@@ -152,4 +152,30 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   if File.exist?('Vagrantfile.local')
     eval File.read 'Vagrantfile.local'
   end
+
+  # Vagrant Triggers
+  #
+  # If the vagrant-triggers plugin is installed, we can run various scripts on Vagrant
+  # state changes like `vagrant up`, `vagrant halt`, `vagrant suspend`, and `vagrant destroy`
+  #
+  # These scripts are run on the host machine, so we use `vagrant ssh` to tunnel back
+  # into the VM and execute things. By default, each of these scripts calls db_backup
+  # to create backups of all current databases. This can be overridden with custom
+  # scripting. See the individual files in data/homebin/ for details.
+  if defined? VagrantPlugins::Triggers
+    config.trigger.before :halt, :stdout => true do
+      info "create database dump."
+      run_remote  "bash /vagrant/database/scripts/db_backup"
+    end
+    
+    config.trigger.before :suspend, :stdout => true do
+      info "create database dump."
+      run_remote  "bash /vagrant/database/scripts/db_backup"
+    end
+
+    config.trigger.before :destroy, :stdout => true do
+      info "create database dump."
+      run_remote  "bash /vagrant/database/scripts/db_backup"
+    end
+  end
 end
