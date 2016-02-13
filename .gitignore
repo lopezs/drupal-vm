@@ -10,3 +10,4 @@ Vagrantfile.local
 examples/prod/inventory
 /scripts/
 roles/
+docroot/
